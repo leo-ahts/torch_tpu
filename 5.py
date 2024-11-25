@@ -40,10 +40,19 @@ with torch.profiler.profile(
 ) as prof:
     for epoch in range(5): # Simulate 5 epochs of training
         optimizer.zero_grad()
-        outputs = model(inputs)
-        loss = criterion(outputs, target).to('tpu')
-        loss.backward()
-        optimizer.step()
+        
+        with torch.profiler.record_function("TPU_Operation: TPU_FORWARD_PASS"):
+            outputs = model(inputs)
+        
+        with torch.profiler.record_function("TPU_Operation: TPU_LOSS_COMPUTATION"):
+            loss = criterion(outputs, target)
+        
+        with torch.profiler.record_function("TPU_Operation: TPU_BACKWARD_PASS"):
+            loss.backward()
+        
+        with torch.profiler.record_function("TPU_Operation: TPU_OPTIMIZER_STEP"):
+            optimizer.step()
+        
         prof.step()
 # 性能数据
 events = prof.key_averages().table(sort_by="cpu_time_total", row_limit=10)
