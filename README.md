@@ -11,6 +11,5 @@ tensorboard --logdir=./logs（相对路径）
 记录堆栈信息，提供有关每个操作的调用栈。
 
 可视化分析如下图所示：
-'markdown
 ![可视化](https://github.com/user-attachments/assets/8ecadc52-3c29-45a0-ac00-9d3f74de0d47)
-'
+
