@@ -15,9 +15,17 @@ with torch.profiler.profile(
     with_stack=True  # 在操作中记录堆栈信息
 ) as prof:
     optimizer.zero_grad()
-    output = model(inputs)
-    loss = criterion(output, target)
-    loss.backward()
-    optimizer.step()
+        
+        with torch.profiler.record_function("TPU_Operation: TPU_FORWARD_PASS"):
+            outputs = model(inputs)
+        
+        with torch.profiler.record_function("TPU_Operation: TPU_LOSS_COMPUTATION"):
+            loss = criterion(outputs, target)
+        
+        with torch.profiler.record_function("TPU_Operation: TPU_BACKWARD_PASS"):
+            loss.backward()
+        
+        with torch.profiler.record_function("TPU_Operation: TPU_OPTIMIZER_STEP"):
+            optimizer.step()
 
 prof.export_chrome_trace("trace.json")
